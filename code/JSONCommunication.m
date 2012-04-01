@@ -274,7 +274,6 @@
     
     NSData *result = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
     
-    // Do not crash if there is no internet connection
     if (result != nil)
     {
         NSDictionary* json = [NSJSONSerialization JSONObjectWithData:result options:kNilOptions error:&error];
@@ -294,88 +293,11 @@
             return nil;
         }
     }
-    // No internet connection - sendSynchronousRequest returns nil
     else {
         return nil;
     }
 }
 
-/*
- input type="file" name="questionid_36"
- input type="file" name="questionid_37"
- то това файловете, които ще се сбмитнат ще имат имена на частите questionid_36 и questionid_37.
- Сщо така, в замия POST трябва да има полетата:
- devID,session_id,reference_id за да знаем кой качва и кде качва.
- */
-
-//Upload image
-- (void) uploadPic:(UIImage *)image
-{    
-    NSData *imageData = UIImageJPEGRepresentation(image, 1);
-    // create the connection
-    NSMutableURLRequest *uploadImageReq = [NSMutableURLRequest requestWithURL:k URL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60];
-    
-    // change type to POST (default is GET)
-    [uploadImageReq setHTTPMethod:@"POST"];
-    
-    // just some random text that will never occur in the body
-    NSString *stringBoundary = @"0xKhTmLbOuNdArY---This_Is_ThE_BoUnDaRyy---pqo";
-    
-    // header value, user session ID added
-    NSString *headerBoundary = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",
-                                stringBoundary];
-    
-    // set header
-    [uploadImageReq addValue:headerBoundary forHTTPHeaderField:@"Content-Type"];
-    // create data
-    NSMutableData *postBody = [NSMutableData data];
-    
-    // title part
-    [postBody appendData:[[NSString stringWithFormat:@"--%@\r\n", stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    [postBody appendData:[[NSString stringWithString:@"Content-Disposition: form-data; name=\"title\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-    [postBody appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    // desc part
-    [postBody appendData:[[NSString stringWithFormat:@"--%@\r\n", stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    [postBody appendData:[[NSString stringWithString:@"Content-Disposition: form-data; name=\"desc\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-    [postBody appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    // media part
-    [postBody appendData:[[NSString stringWithFormat:@"--%@\r\n", stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    /*[postBody appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"file\"; filename=\"%@.jpeg\"\r\n", self.chosenImage.imgTitle ] dataUsingEncoding:NSUTF8StringEncoding]];*/
-    [postBody appendData:[@"Content-Type: image/jpeg\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
-    [postBody appendData:[NSData dataWithData:imageData]];
-    [postBody appendData:[@"Content-Transfer-Encoding: binary\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    // final boundary
-    [postBody appendData:[[NSString stringWithFormat:@"--%@--\r\n", stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    NSString *s = [[NSString alloc] initWithData:postBody encoding:NSASCIIStringEncoding];
-    NSLog(@"%@", s);
-    
-    // add body to post
-    [uploadImageReq setHTTPBody:postBody];
-    
-    // pointers to some necessary objects
-    NSURLResponse* response;
-    NSError* error;
-    
-    // synchronous filling of data from HTTP POST response
-    NSData *responseData = [NSURLConnection sendSynchronousRequest:uploadImageReq returningResponse:&response error:&error];
-    
-    if (error)
-    {
-        NSLog(@"Error: %@", [error localizedDescription]);
-    }
-    
-    // convert data into string
-    NSString *responseString = [[NSString alloc] initWithBytes:[responseData bytes]
-                                                        length:[responseData length]
-                                                      encoding:NSUTF8StringEncoding];
-    
-    // see if we get a welcome result
-    NSLog(@"%@", responseString);
-    //[self responseHandler:responseString];
-}
 
 //show error alert
 -(void)showAlert:(NSString *)msg{
